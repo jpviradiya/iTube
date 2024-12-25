@@ -1,4 +1,4 @@
-class apiError extends Error {
+class ApiError extends Error {
   constructor(
     statusCode,
     message = "Something went wrong",
@@ -20,11 +20,11 @@ class apiError extends Error {
     }
   }
 }
-export { apiError };
+export { ApiError };
 /*
 INPUT:
 try {
-  throw new apiError(404, "Resource not found", ["Invalid ID"], "Custom stack trace");
+  throw new ApiError(404, "Resource not found", ["Invalid ID"], "Custom stack trace");
 } catch (error) {
   console.error(error);
 }

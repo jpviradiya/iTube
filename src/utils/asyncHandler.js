@@ -6,7 +6,7 @@
 
 // using promises
 const asyncHandler = (fn) => {
-  (req, res, next) => {
+  return (req, res, next) => {
     Promise.resolve(fn(req, res, next)) // executes the given funtion provided during function call
       .catch((err) => next(err)); // if error occure then next is call to execute
   };

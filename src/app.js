@@ -5,7 +5,7 @@ import cors from "cors";
 const app = express();
 
 // defining cors configrations
-corsOptions = {
+const corsOptions = {
   origin: process.env.CORS_ORIGIN,
   Credentials: true,
 };
@@ -26,5 +26,12 @@ app.use(express.static("public"));
 
 // CRUD user cookie from server
 app.use(cookieParser());
+
+
+//! importing routes
+import userRouter from "./routes/user.routes.js"; 
+
+//! declaring routes
+app.use("/api/v1/users", userRouter); // call user routes
 
 export { app };

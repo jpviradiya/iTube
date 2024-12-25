@@ -4,7 +4,7 @@ import { app } from "./app.js";
 
 // mordern syntax to work with dotenv package
 dotenv.config({
-  path: "./env",
+  path: "./.env",
 });
 
 // connecting to the database
