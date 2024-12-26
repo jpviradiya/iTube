@@ -1,8 +1,10 @@
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { ApiError } from "../utils/ApiError.js";
-import { User } from "./../models/user.model.js";
-import { uploadFileOnCloudinary } from "../utils/cloudinary.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
+import { User } from "../models/index.js";
+import {
+  asyncHandler,
+  ApiResponse,
+  ApiError,
+  uploadFileOnCloudinary,
+} from "../utils/index.js";
 // user register function
 const registerUser = asyncHandler(async (req, res) => {
   //! steps to register user
@@ -23,7 +25,6 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // 1. getting user details
   const { fullName, email, password, username } = req.body;
-  console.log("request body:\n", req.body);
 
   // 2. validating user details
   if (
@@ -39,23 +40,31 @@ const registerUser = asyncHandler(async (req, res) => {
     $or: [{ email }, { username }],
   });
   if (userExsistance) {
-    throw new ApiError(400, "User already exists");
+    throw new ApiError(409, "User already exists");
   }
 
-  // 4. check for files
-  console.log(req.files);
+  // 4. check for files & 5. upload files on cloudinary
+
+  // for avatar
   const avatarLPath = req.files?.avatar[0]?.path; // if there is files -> if there is avatar -> if there is path = then give path
-  const coverImgLPath = req.files?.coverImg[0]?.path;
   if (!avatarLPath) {
     throw new ApiError(400, "Avatar is required");
   }
-
-  // 5. upload files on cloudinaryl
   const avatar = await uploadFileOnCloudinary(avatarLPath);
-  const coverImg = await uploadFileOnCloudinary(coverImgLPath);
   if (!avatar) {
-    throw new ApiError(400, "Avatar is Required");
+    throw new ApiError(400, "Avatar is Required while uploading on cloudinary");
   }
+
+  // for coverImg
+  let coverImgLPath;
+  if (
+    req.files &&
+    Array.isArray(req.files.coverImage) &&
+    req.files.coverImage.length > 0
+  ) {
+    coverImgLPath = req.files.coverImg[0].path;
+  }
+  const coverImg = await uploadFileOnCloudinary(coverImgLPath);
 
   // 6. create user object
   const user = await User.create({

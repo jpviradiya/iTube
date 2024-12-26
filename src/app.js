@@ -27,9 +27,8 @@ app.use(express.static("public"));
 // CRUD user cookie from server
 app.use(cookieParser());
 
-
 //! importing routes
-import userRouter from "./routes/user.routes.js"; 
+import { userRouter } from "./routes/index.js";
 
 //! declaring routes
 app.use("/api/v1/users", userRouter); // call user routes

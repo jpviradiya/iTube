@@ -24,11 +24,11 @@ const userSchema = new Schema(
       trim: true,
       index: true,
     },
-    avtar: {
+    avatar: {
       type: String,
       required: true,
     },
-    coverImage: {
+    coverImg: {
       type: String,
     },
     watchHistory: [
@@ -63,7 +63,7 @@ userSchema.methods.isPasswordCorrect = async function (password) {
 };
 
 //* generate access token
-userSchema.models.generateAccessToken = function () {
+userSchema.methods.generateAccessToken = function () {
   // jwt.sign({payload},secretKey,{options})
   return jwt.sign(
     {
@@ -81,7 +81,7 @@ userSchema.models.generateAccessToken = function () {
 };
 
 //* generate refresh token
-userSchema.models.generateRefreshToken = function () {
+userSchema.methods.generateRefreshToken = function () {
   // jwt.sign({payload},secretKey,{options})
   return jwt.sign(
     {
