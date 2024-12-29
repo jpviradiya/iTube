@@ -62,12 +62,12 @@ userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcryptjs.compare(password, this.password); // this.password is ref to object
 };
 
-//* generate access token
+//! generate access token
 userSchema.methods.generateAccessToken = function () {
   // jwt.sign({payload},secretKey,{options})
   return jwt.sign(
     {
-      //payload (RHS is fetch from database)
+      // payload is provide when you decode the token
       _id: this._id,
       email: this.email,
       username: this.username,
@@ -80,12 +80,12 @@ userSchema.methods.generateAccessToken = function () {
   );
 };
 
-//* generate refresh token
+//! generate refresh token
 userSchema.methods.generateRefreshToken = function () {
   // jwt.sign({payload},secretKey,{options})
   return jwt.sign(
     {
-      //payload (RHS is fetch from database)
+      // payload is provide when you decode the token
       _id: this._id,
     },
     process.env.REFRESH_TOKEN_SECRET, // secret key

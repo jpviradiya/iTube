@@ -3,7 +3,7 @@
 // const asyncHandler = () => () => { };     // syntax for higher odrder function call for function
 
 //! one method is use to call another method
-
+//! It eliminates the need for try-catch blocks in every asynchronous route handler. 
 // using promises
 const asyncHandler = (fn) => {
   return (req, res, next) => {
