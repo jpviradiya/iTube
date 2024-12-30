@@ -38,6 +38,7 @@ const videoSchema = new Schema(
   { timestamps: true }
 );
 
-// allow us to write aggregation query
+// allow us to write aggregation query which provide extra functionallity like pagination which is set limits to page
+// without this plugin you can write basic query line $match, $lookup, etc.
 videoSchema.plugin(mongooseAggregatePaginate); // videoSchema has been added to the mongoose AggregatePaginate plugin
 export const Video = mongoose.model("Video", videoSchema);

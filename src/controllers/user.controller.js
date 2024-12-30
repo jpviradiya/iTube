@@ -370,6 +370,94 @@ const updateUserCoverImg = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "Cover Image updated successfully!!"));
 });
 
+//! get user's channel profile
+const getUserChanneProfile = asyncHandler(async (req, res) => {
+  // get username from url
+  const { username } = req.params;
+
+  // check for username
+  if (!username?.trim()) {
+    throw new ApiError(400, "username is missing");
+  }
+
+  // aggregation pipeline query(result will return in array data structure)(0th ele of array is ans)
+  const channelProfile = await User.aggregate([
+    //? pipeline 1 (filter based on username)
+    {
+      // $match filters the document based on username
+      $match: {
+        username: username?.toLowerCase(),
+      },
+    },
+    //? pipeline 2 (subscribers for that user)
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "channel",
+        as: "subscribers",
+      },
+    },
+    //? pipeline 3 (channel to whom user subscribed)
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "subscriber",
+        as: "subscribedTo",
+      },
+    },
+    //? pipeline 4 (adding field to response)
+    {
+      $addFields: {
+        subscriberCount: {
+          $size: "$subscriber", // $size count num of record
+        },
+        subscribedToCount: {
+          $size: "$subscribedTo",
+        },
+        isSubscribed: {
+          $cond: {
+            // if user entry is there in subscribe field then will return true
+            // ex. i sub my channel then list of my sub has also name of my
+            // ex. i sub to my friend A then subscriber of A has name of mine so if i visit his channel then show true
+            if: { $in: [req.user?._id, "$subscriber.subscribe"] }, // search userid in $subscriber(object)
+            then: true,
+            else: false,
+          },
+        },
+      },
+    },
+    //? pipeline 5 (projection the document)
+    {
+      $project: {
+        fullName: 1,
+        username: 1,
+        email: 1,
+        subscriberCount: 1,
+        subscribedToCount: 1,
+        isSubscribed: 1,
+        avatar: 1,
+        coverImg: 1,
+      },
+    },
+  ]);
+
+  // check for channel profile length
+  if (!channelProfile?.length) {
+    throw new ApiError(404,"Channel does not exists")
+  }
+
+  // return response
+  return res
+  .status(200)
+  .json(new ApiResponse(
+    200,
+    channelProfile[0], // return the first obj of the response
+    "user channel fetched successfully"
+  ))
+});
+
 export {
   registerUser,
   loginUser,
@@ -380,4 +468,5 @@ export {
   updateAccountDetails,
   updateUserAvatar,
   updateUserCoverImg,
+  getUserChanneProfile,
 };
