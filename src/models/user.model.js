@@ -57,7 +57,7 @@ userSchema.pre("save", async function (next) {
 
 //! userSchema.methods.   (this will add method to userSchema, this methods use when User object is called specific method)
 
-// decrypt password, methods is object in js
+// decrypt password
 userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcryptjs.compare(password, this.password); // this.password is ref to object
 };
