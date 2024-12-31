@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { COOKIE_OPTION } from "../constants.js";
 import { User } from "../models/index.js";
 import {
@@ -445,17 +446,88 @@ const getUserChanneProfile = asyncHandler(async (req, res) => {
 
   // check for channel profile length
   if (!channelProfile?.length) {
-    throw new ApiError(404,"Channel does not exists")
+    throw new ApiError(404, "Channel does not exists");
   }
 
   // return response
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      channelProfile[0], // return the first obj of the response
+      "user channel fetched successfully"
+    )
+  );
+});
+
+//!  get watch history (toughest)
+const getWatchHistroy = asyncHandler(async (req, res) => {
+
+  // aggregation query to fetch user history
+  const userHistory = await User.aggregate([
+    //? pipeline 1 (match _id)
+    {
+      $match: {
+        //_id is not direcly work in aggeration (coversion is needed)
+        _id: new mongoose.Types.ObjectId(req.user._id),
+      },
+    },
+    //? pipeline 2 (lookup for watchHistory(users) in (videos) )
+    {
+      $lookup: {
+        from: "videos",
+        localField: "watchHistory",
+        foreignField: "_id",
+        as: "watchHistory",
+        // fetch onwer data
+        pipeline: [
+          //?? pipeline 2.1 (lookup for owner(videos) in (users))
+          {
+            $lookup: {
+              from: "users",
+              localField: "owner",
+              foreignField: "_id",
+              as: "owner",
+              // project owner data
+              pipeline: [
+                //??? pipeline 2.1.1 (project the value)
+                {
+                  $project: {
+                    _id: 1,
+                    fullName: 1,
+                    username: 1,
+                    avatar: 1,
+                  },
+                },
+              ],
+            },
+          },
+          //?? pipeline 2.2 (override the owner field and provide first array element which reduce extra loop)
+          {
+            $addFields: {
+              owner: {
+                $first: "$owner",
+                //$arrayElemAt: ["$owner", 0], (alternate ways) 
+              },
+            },
+          },
+        ],
+      },
+    },
+  ]);
+
+  // fetch only watch history data from the first object of the answer value
+  const userWatchHistroyData = userHistory[0].watchHistory;
+
+  // return response
   return res
-  .status(200)
-  .json(new ApiResponse(
-    200,
-    channelProfile[0], // return the first obj of the response
-    "user channel fetched successfully"
-  ))
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        userWatchHistroyData,
+        "user watch history fetched successfully!!"
+      )
+    )
 });
 
 export {
@@ -469,4 +541,5 @@ export {
   updateUserAvatar,
   updateUserCoverImg,
   getUserChanneProfile,
+  getWatchHistroy,
 };

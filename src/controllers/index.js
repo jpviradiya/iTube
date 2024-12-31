@@ -8,6 +8,8 @@ import {
   updateAccountDetails,
   updateUserAvatar,
   updateUserCoverImg,
+  getUserChanneProfile,
+  getWatchHistroy,
 } from "./user.controller.js";
 
 export {
@@ -20,4 +22,6 @@ export {
   updateAccountDetails,
   updateUserAvatar,
   updateUserCoverImg,
+  getUserChanneProfile,
+  getWatchHistroy,
 };
