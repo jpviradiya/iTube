@@ -1,6 +1,7 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import { API_VERSION } from "./constants.js";
 
 const app = express();
 
@@ -31,6 +32,6 @@ app.use(cookieParser());
 import { userRouter } from "./routes/index.js";
 
 //! declaring routes
-app.use("/api/v1/users", userRouter); // call user routes
+app.use(`${API_VERSION}/users`, userRouter); // call user routes
 
 export { app };

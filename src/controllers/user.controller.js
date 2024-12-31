@@ -197,7 +197,8 @@ const logoutUser = asyncHandler(async (req, res) => {
 //! refresh Access token
 const refreshAccessToken = asyncHandler(async (req, res) => {
   // fetch refresh token from user
-  const incomingRefreshToken = req.cookie.refreshToken || req.body.refreshToken;
+  const incomingRefreshToken =
+    req.cookies.refreshToken || req.body.refreshToken;
   if (!incomingRefreshToken) {
     throw new ApiError(401, "unauthorized request");
   }
@@ -220,20 +221,21 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     }
 
     // generate new access and refresh tokens
-    const { accessToken, newRefreshToken } =
-      await generateAccessAndRefreshToken(user._id);
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
+      user._id
+    );
 
     // sending response
     return res
       .status(200)
       .cookie("accessToken", accessToken, COOKIE_OPTION)
-      .cookie("refreshToken", newRefreshToken, COOKIE_OPTION)
+      .cookie("refreshToken", refreshToken, COOKIE_OPTION)
       .json(
         new ApiResponse(
           200,
           {
             accessToken,
-            refreshToken: newRefreshToken,
+            refreshToken,
           },
           "token refresh successfully!!"
         )
@@ -309,12 +311,14 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
   ).select("-password");
 
   // return response
-  return res.status(200).json(200, user, "All fields are updated successfully");
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "All fields are updated successfully"));
 });
 
 //! update user avatar
 const updateUserAvatar = asyncHandler(async (req, res) => {
-  const avatarLPath = req.files;
+  const avatarLPath = req.file?.path;
   if (!avatarLPath) {
     throw new ApiError(400, "Avatar file is missing");
   }
@@ -323,7 +327,8 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   if (!avatar.url) {
     throw new ApiError(400, "error while uploading avatar on cloudinary");
   }
-  //! TODO: delete old image from cloudinary for both avatar and coverImg
+  //! TODO: 1.delete old image from cloudinary for both avatar and coverImg
+  //! TODO: 2.return proper and needed response not whole user(do this for all contorllers)
 
   const user = await User.findByIdAndUpdate(
     req.user._id,
@@ -344,7 +349,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
 //! update user cover image
 const updateUserCoverImg = asyncHandler(async (req, res) => {
-  const coverImgLPath = req.files;
+  const coverImgLPath = req.file?.path;
   if (!coverImgLPath) {
     throw new ApiError(400, "cover file is missing");
   }
@@ -412,7 +417,7 @@ const getUserChanneProfile = asyncHandler(async (req, res) => {
     {
       $addFields: {
         subscriberCount: {
-          $size: "$subscriber", // $size count num of record
+          $size: "$subscribers", // $size count num of record
         },
         subscribedToCount: {
           $size: "$subscribedTo",
@@ -422,7 +427,7 @@ const getUserChanneProfile = asyncHandler(async (req, res) => {
             // if user entry is there in subscribe field then will return true
             // ex. i sub my channel then list of my sub has also name of my
             // ex. i sub to my friend A then subscriber of A has name of mine so if i visit his channel then show true
-            if: { $in: [req.user?._id, "$subscriber.subscribe"] }, // search userid in $subscriber(object)
+            if: { $in: [req.user?._id, "$subscribers.subscribe"] }, // search userid in $subscriber(object)
             then: true,
             else: false,
           },
@@ -461,7 +466,6 @@ const getUserChanneProfile = asyncHandler(async (req, res) => {
 
 //!  get watch history (toughest)
 const getWatchHistroy = asyncHandler(async (req, res) => {
-
   // aggregation query to fetch user history
   const userHistory = await User.aggregate([
     //? pipeline 1 (match _id)
@@ -506,7 +510,7 @@ const getWatchHistroy = asyncHandler(async (req, res) => {
             $addFields: {
               owner: {
                 $first: "$owner",
-                //$arrayElemAt: ["$owner", 0], (alternate ways) 
+                //$arrayElemAt: ["$owner", 0], (alternate ways)
               },
             },
           },
@@ -527,7 +531,7 @@ const getWatchHistroy = asyncHandler(async (req, res) => {
         userWatchHistroyData,
         "user watch history fetched successfully!!"
       )
-    )
+    );
 });
 
 export {
