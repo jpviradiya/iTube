@@ -1,4 +1,4 @@
-// store file from main server from local server then delete from local if successfully transfer
+// store file local to cloudinary server then delete from local if successfully transfer
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 
