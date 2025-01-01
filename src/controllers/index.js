@@ -12,6 +12,52 @@ import {
   getWatchHistroy,
 } from "./user.controller.js";
 
+import {
+  getAllVideos,
+  publishVideo,
+  getVideoById,
+  updateVideo,
+  deleteVideo,
+  togglePublishStatus,
+} from "./video.controller.js";
+
+import {
+  getVideoComments,
+  addComment,
+  updateComment,
+  deleteComment,
+} from "./comment.controller.js";
+
+import {
+  toggleCommentLike,
+  toggleTweetLike,
+  toggleVideoLike,
+  getLikedVideos,
+} from "./like.controller.js";
+
+import {
+  createPlaylist,
+  getUserPlaylists,
+  getPlaylistById,
+  addVideoToPlaylist,
+  removeVideoFromPlaylist,
+  deletePlaylist,
+  updatePlaylist,
+} from "./playlist.controller.js";
+
+import {
+  toggleSubscription,
+  getUserChannelSubscribers,
+  getSubscribedChannels,
+} from "./subscription.controller.js";
+
+import {
+  createTweet,
+  getUserTweets,
+  updateTweet,
+  deleteTweet,
+} from "./tweet.controller.js";
+
 export {
   registerUser,
   loginUser,
@@ -24,4 +70,32 @@ export {
   updateUserCoverImg,
   getUserChanneProfile,
   getWatchHistroy,
+  getAllVideos,
+  publishVideo,
+  getVideoById,
+  updateVideo,
+  deleteVideo,
+  togglePublishStatus,
+  getVideoComments,
+  addComment,
+  updateComment,
+  deleteComment,
+  toggleCommentLike,
+  toggleTweetLike,
+  toggleVideoLike,
+  getLikedVideos,
+  createPlaylist,
+  getUserPlaylists,
+  getPlaylistById,
+  addVideoToPlaylist,
+  removeVideoFromPlaylist,
+  deletePlaylist,
+  updatePlaylist,
+  toggleSubscription,
+  getUserChannelSubscribers,
+  getSubscribedChannels,
+  createTweet,
+  getUserTweets,
+  updateTweet,
+  deleteTweet,
 };
