@@ -13,7 +13,6 @@ import jwt from "jsonwebtoken";
 
 //! user register function
 const registerUser = asyncHandler(async (req, res) => {
-  //! steps to register user
   /*
   1. get user detail from frontend
   2. validate user detail
@@ -329,11 +328,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Avatar file is missing");
   }
 
-  // deleting file from cloudinary
-  const deleteAvatar = await deleteFileFromCloudinary(req.user.avatar);
-  if (deleteAvatar.result !== "ok") {
-    throw new ApiError(400, "error while deleting from cloudinary");
-  }
+  const oldAvatarUrl = req.user.avatar;
 
   // upload new avatar
   const avatar = await uploadFileOnCloudinary(avatarLPath);
@@ -353,6 +348,14 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     }
   ).select("-password");
 
+  if (user.avatar !== oldAvatarUrl) {
+    // deleting file from cloudinary
+    const deleteAvatar = await deleteFileFromCloudinary(req.user.avatar);
+    if (deleteAvatar.result !== "ok") {
+      throw new ApiError(400, "error while deleting from cloudinary");
+    }
+  }
+
   return res
     .status(200)
     .json(new ApiResponse(200, user.avatar, "Avatar updated successfully!!"));
@@ -365,11 +368,8 @@ const updateUserCoverImg = asyncHandler(async (req, res) => {
     throw new ApiError(400, "cover file is missing");
   }
 
-  // deleting file from cloudinary
-  const deleteCoverImg = await deleteFileFromCloudinary(req.user.coverImg);
-  if (deleteCoverImg.result !== "ok") {
-    throw new ApiError(400, "error while deleting from cloudinary");
-  }
+  // store old image url
+  const oldCoverImgUrl = req.user.coverImg;
 
   const coverImg = await uploadFileOnCloudinary(coverImgLPath);
   if (!coverImg.url) {
@@ -387,6 +387,14 @@ const updateUserCoverImg = asyncHandler(async (req, res) => {
       new: true,
     }
   ).select("-password");
+
+  if (user.coverImg !== oldCoverImgUrl) {
+    // deleting file from cloudinary
+    const deleteCoverImg = await deleteFileFromCloudinary(oldCoverImgUrl);
+    if (deleteCoverImg.result !== "ok") {
+      throw new ApiError(400, "error while deleting from cloudinary");
+    }
+  }
 
   return res
     .status(200)

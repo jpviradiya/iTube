@@ -5,13 +5,11 @@ import { User } from "../models/index.js";
 export const verifyJWT = asyncHandler(async (req, _, next) => {
   try {
     // get cookie detail
-    const token =
-      req.cookies?.accessToken ||
-      req.headers("Authorization").replace("Bearer ", ""); // get token from header (mobile)
+    const token = req.cookies?.accessToken;
 
     // check if token is present
     if (!token) {
-      throw new ApiError(401, "Unauthorized access");
+      throw new ApiError(401, "Unauthorized access while logout");
     }
 
     // verify token

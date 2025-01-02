@@ -22,7 +22,6 @@ const deleteFileFromCloudinary = async (publicUrl) => {
 
     // delete file from cloudinary
     const file = await cloudinary.uploader.destroy(publicId);
-    console.log(file);
 
     return file;
   } catch (error) {
