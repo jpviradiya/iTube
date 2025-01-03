@@ -55,7 +55,7 @@ const registerUser = asyncHandler(async (req, res) => {
   if (!avatarLPath) {
     throw new ApiError(400, "Avatar is required");
   }
-  const avatar = await uploadFileOnCloudinary(avatarLPath);
+  const avatar = await uploadFileOnCloudinary(avatarLPath, "image");
   if (!avatar) {
     throw new ApiError(400, "Avatar is Required while uploading on cloudinary");
   }
@@ -69,7 +69,7 @@ const registerUser = asyncHandler(async (req, res) => {
   ) {
     coverImgLPath = req.files.coverImg[0].path;
   }
-  const coverImg = await uploadFileOnCloudinary(coverImgLPath);
+  const coverImg = await uploadFileOnCloudinary(coverImgLPath, "image");
 
   // 6. create user object
   const user = await User.create({
@@ -288,27 +288,20 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 //! update account details
 const updateAccountDetails = asyncHandler(async (req, res) => {
-  // Define allowed fields for update
-  const allowedFields = ["fullName", "username"];
+  const { fullName, username } = req.body;
 
-  // Filter the incoming fields to only include allowed fields
-  const updates = Object.keys(req.body).reduce((filtered, key) => {
-    if (allowedFields.includes(key)) {
-      filtered[key] = req.body[key];
-    }
-    return filtered;
-  }, {});
-
-  // Ensure at least one valid field is provided
-  if (Object.keys(updates).length === 0) {
-    throw new ApiError(400, "No valid fields provided for update");
+  if (!fullName && !username) {
+    throw new ApiError(400, "At least one of fullname or username is needed");
   }
 
   // fetch and update user from its id
   const user = await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: updates,
+      $set: {
+        ...(fullName && { fullName }),
+        ...(username && { username }),
+      },
     },
     {
       new: true,
@@ -318,7 +311,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
   // return response
   return res
     .status(200)
-    .json(new ApiResponse(200, updates, "All fields are updated successfully"));
+    .json(new ApiResponse(200, user, "All fields are updated successfully"));
 });
 
 //! update user avatar
@@ -331,7 +324,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   const oldAvatarUrl = req.user.avatar;
 
   // upload new avatar
-  const avatar = await uploadFileOnCloudinary(avatarLPath);
+  const avatar = await uploadFileOnCloudinary(avatarLPath, "image");
   if (!avatar.url) {
     throw new ApiError(400, "error while uploading avatar on cloudinary");
   }
@@ -348,9 +341,12 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     }
   ).select("-password");
 
+  // deletin g file from cloudinary
   if (user.avatar !== oldAvatarUrl) {
-    // deleting file from cloudinary
-    const deleteAvatar = await deleteFileFromCloudinary(req.user.avatar);
+    const deleteAvatar = await deleteFileFromCloudinary(
+      req.user.avatar,
+      "image"
+    );
     if (deleteAvatar.result !== "ok") {
       throw new ApiError(400, "error while deleting from cloudinary");
     }
@@ -371,11 +367,12 @@ const updateUserCoverImg = asyncHandler(async (req, res) => {
   // store old image url
   const oldCoverImgUrl = req.user.coverImg;
 
-  const coverImg = await uploadFileOnCloudinary(coverImgLPath);
+  const coverImg = await uploadFileOnCloudinary(coverImgLPath, "image");
   if (!coverImg.url) {
     throw new ApiError(400, "error while uploading avatar on cloudinary");
   }
 
+  // update new cover image
   const user = await User.findByIdAndUpdate(
     req.user._id,
     {
@@ -388,9 +385,12 @@ const updateUserCoverImg = asyncHandler(async (req, res) => {
     }
   ).select("-password");
 
+  // deleting file from cloudinary
   if (user.coverImg !== oldCoverImgUrl) {
-    // deleting file from cloudinary
-    const deleteCoverImg = await deleteFileFromCloudinary(oldCoverImgUrl);
+    const deleteCoverImg = await deleteFileFromCloudinary(
+      oldCoverImgUrl,
+      "image"
+    );
     if (deleteCoverImg.result !== "ok") {
       throw new ApiError(400, "error while deleting from cloudinary");
     }

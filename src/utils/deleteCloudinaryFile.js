@@ -8,12 +8,16 @@ cloudinary.config({
 });
 
 const extractPublicId = (url) => {
-  const parts = url.split("/");
-  const fileName = parts[parts.length - 1];
-  return fileName.split(".")[0]; // Removes the extension
+  try {
+    const parts = url.split("/");
+    const fileName = parts[parts.length - 1].split("?")[0]; // Removes query params
+    return fileName.split(".")[0]; // Removes file extension
+  } catch (error) {
+    throw new ApiError(500, "Invalid URL format for extracting public ID");
+  }
 };
 
-const deleteFileFromCloudinary = async (publicUrl) => {
+const deleteFileFromCloudinary = async (publicUrl, resourceType) => {
   try {
     if (!publicUrl) return null;
 
@@ -21,14 +25,13 @@ const deleteFileFromCloudinary = async (publicUrl) => {
     const publicId = extractPublicId(publicUrl);
 
     // delete file from cloudinary
-    const file = await cloudinary.uploader.destroy(publicId);
+    const file = await cloudinary.uploader.destroy(publicId, {
+      resource_type: resourceType,
+    });
 
     return file;
   } catch (error) {
-    throw new ApiError(
-      400,
-      "error while deleting file from cloudinary in utility"
-    );
+    throw error?.message;
   }
 };
 
