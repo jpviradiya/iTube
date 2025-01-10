@@ -14,6 +14,7 @@ import {
 
 import {
   getAllVideos,
+  getAllVideoTesting,
   publishVideo,
   getVideoById,
   updateVideoDetails,
@@ -100,4 +101,5 @@ export {
   getUserTweets,
   updateTweet,
   deleteTweet,
+  getAllVideoTesting,
 };

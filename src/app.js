@@ -29,11 +29,17 @@ app.use(express.static("public"));
 app.use(cookieParser());
 
 //! importing routes
-import { userRouter, videoRoute, commentRouter } from "./routes/index.js";
+import {
+  userRouter,
+  videoRouter,
+  commentRouter,
+  tweetRouter,
+} from "./routes/index.js";
 
 //! declaring routes
 app.use(`${API_VERSION}/users`, userRouter);
-app.use(`${API_VERSION}/videos`, videoRoute);
+app.use(`${API_VERSION}/videos`, videoRouter);
 app.use(`${API_VERSION}/comments`, commentRouter);
+app.use(`${API_VERSION}/tweets`, tweetRouter);
 
 export { app };

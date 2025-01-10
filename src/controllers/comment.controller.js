@@ -19,15 +19,17 @@ const getVideoComments = asyncHandler(async (req, res) => {
   const skip = (numOfPage - 1) * itemsPerPage;
 
   // fetching comments
-  const comments = await Comment.find({video:  new mongoose.Types.ObjectId(videoId)})
+  const comments = await Comment.find({ video: videoId })
     .skip(skip)
-    .limit(itemsPerPage);
+    .limit(itemsPerPage)
+    .sort({ updatedAt: -1 })
+    .populate("owner", "fullName username email"); // gives name of the owner
   if (!comments) {
     throw new ApiError(500, "no comments found");
   }
 
   // counting comments
-  const commentCount = await Comment.countDocuments({video:new mongoose.Types.ObjectId(videoId)});
+  const commentCount = await Comment.countDocuments({ video: videoId });
 
   // return response
   return res.status(200).json(
