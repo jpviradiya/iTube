@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { upload, verifyJWT } from "../middlewares/index.js";
 import {
+  getAllVideos,
   publishVideo,
   getVideoById,
   deleteVideo,
@@ -10,11 +11,13 @@ import {
 } from "../controllers/index.js";
 
 // creating video route
-const videoRoute = Router();
+const videoRouter = Router();
 
 //! make all routes secure
-videoRoute.use(verifyJWT);
-videoRoute.route("/publish-video").post(
+videoRouter.use(verifyJWT);
+
+videoRouter.route("/").get(getAllVideos);
+videoRouter.route("/publish-video").post(
   // call middleware to upload file on local
   upload.fields([
     { name: "videoFile", maxCount: 1 },
@@ -22,10 +25,13 @@ videoRoute.route("/publish-video").post(
   ]),
   publishVideo
 );
-videoRoute
+videoRouter
   .route("/:videoId")
   .get(getVideoById)
   .delete(deleteVideo)
   .patch(updateVideoDetails);
-videoRoute.route("/toggle/publish/:videoId").patch(togglePublishStatus);
-export { videoRoute };
+videoRouter
+  .route("/update-thumbnail/:videoId")
+  .patch(upload.single("thumbnail"), updateVideoThumbnail);
+videoRouter.route("/toggle/publish/:videoId").patch(togglePublishStatus);
+export { videoRouter };
