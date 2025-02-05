@@ -34,6 +34,7 @@ import {
   videoRouter,
   commentRouter,
   tweetRouter,
+  likeRouter,
 } from "./routes/index.js";
 
 //! declaring routes
@@ -41,5 +42,6 @@ app.use(`${API_VERSION}/users`, userRouter);
 app.use(`${API_VERSION}/videos`, videoRouter);
 app.use(`${API_VERSION}/comments`, commentRouter);
 app.use(`${API_VERSION}/tweets`, tweetRouter);
+app.use(`${API_VERSION}/likes`, likeRouter);
 
 export { app };
