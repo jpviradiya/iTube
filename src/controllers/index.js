@@ -49,7 +49,7 @@ import {
 import {
   toggleSubscription,
   getUserChannelSubscribers,
-  getSubscribedChannels,
+  getUserSubscribedChannels,
 } from "./subscription.controller.js";
 
 import {
@@ -95,7 +95,7 @@ export {
   updatePlaylist,
   toggleSubscription,
   getUserChannelSubscribers,
-  getSubscribedChannels,
+  getUserSubscribedChannels,
   createTweet,
   getUserTweets,
   updateTweet,
