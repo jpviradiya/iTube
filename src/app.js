@@ -20,7 +20,7 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: "16kb" }));
 
 // encode url data
-app.use(express.urlencoded({ limit: "16kb" }));
+app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 
 // store static file with folder name public
 app.use(express.static("public"));
@@ -38,6 +38,11 @@ import {
   playlistRouter,
   subscriptionRouter,
 } from "./routes/index.js";
+
+//! health check route
+app.get("/health", (req, res) => {
+  res.json({ status: "OK", message: "Server is running" });
+});
 
 //! declaring routes
 app.use(`${API_VERSION}/users`, userRouter);
