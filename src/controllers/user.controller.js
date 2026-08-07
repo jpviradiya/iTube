@@ -196,11 +196,19 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 //! refresh Access token
 const refreshAccessToken = asyncHandler(async (req, res) => {
-  // fetch refresh token from user
   const incomingRefreshToken =
-    req.cookies.refreshToken || req.body.refreshToken;
+    req.cookies?.refreshToken ||
+    req.body?.refreshToken ||
+    req.body?.token ||
+    req.header("Authorization")?.replace("Bearer ", "") ||
+    req.header("x-refresh-token") ||
+    req.query?.refreshToken;
+
   if (!incomingRefreshToken) {
-    throw new ApiError(401, "unauthorized request");
+    throw new ApiError(
+      401,
+      "Refresh token is missing. Provide it in Cookies, JSON body ({ \"refreshToken\": \"...\" }), or Authorization header."
+    );
   }
 
   try {
@@ -454,7 +462,12 @@ const getUserChanneProfile = asyncHandler(async (req, res) => {
             // if user entry is there in subscribe field then will return true
             // ex. i sub my channel then list of my sub has also name of my
             // ex. i sub to my friend A then subscriber of A has name of mine so if i visit his channel then show true
-            if: { $in: [req.user?._id, "$subscribers.subscribe"] }, // search userid in $subscriber(object)
+            if: {
+              $in: [
+                new mongoose.Types.ObjectId(req.user?._id),
+                "$subscribers.subscriber",
+              ],
+            },
             then: true,
             else: false,
           },
@@ -478,7 +491,7 @@ const getUserChanneProfile = asyncHandler(async (req, res) => {
 
   // check for channel profile length
   if (!channelProfile?.length) {
-    throw new ApiError(404, "Channel does not exists");
+    throw new ApiError(404, `Channel '${username}' does not exist`);
   }
 
   // return response
